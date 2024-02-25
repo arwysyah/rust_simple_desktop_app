@@ -2,11 +2,12 @@ use std::{fs};
 
 
 use eframe::egui;
+use native_dialog::FileDialog;
 // use std::fs;
 #[allow(dead_code)]
 #[derive(Default)]
 struct MyDesktopApp {}
-
+static LOC_DIR: &str = "/home/arwy/Documents/Projects/";
 impl MyDesktopApp {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         // Customize egui here with cc.egui_ctx.set_fonts and cc.egui_ctx.set_visuals.
@@ -32,7 +33,7 @@ ui.horizontal(|ui| {
 ui.add(egui::Slider::new(&mut age, 0..=120).text("age"));
 if ui.button("List Directory").clicked() {
                 
-                if let Ok(entries) = fs::read_dir("/home/arwy/Documents/"){
+                if let Ok(entries) = fs::read_dir(LOC_DIR){
                     for entry in entries {
                         let Ok(entry) = entry else { continue };
                         
@@ -45,25 +46,31 @@ if ui.button("List Directory").clicked() {
                     println!("Failed open directory")
                 }
 }
-ui.label(format!("Hello '{name}', age {age}"));
+// ui.label(format!("Hello '{name}', age {age}"));
 if files_directory.is_empty() == false {
                 for files in files_directory {
                     ui.label(files);
                 }
             }   
 if ui.button("Open Directory").clicked() {
-                
-                if let Ok(entries) = fs::read_dir("/home/arwy/Documents/"){
-                    for entry in entries {
-                        if let Ok(entry) = entry {
-                            let paths = entry.path();
-                            println!("{}",paths.display());
-                        }
-                    }
-                }else{
-                    println!("Failed open directory")
-                }
-}
+               match FileDialog::new().show_open_single_file() {
+        Ok(Some(file_path)) => {
+            // Get the directory part of the file path
+            if let Some(parent_dir) = file_path.parent() {
+                println!("Selected directory: {}", parent_dir.display());
+            } else {
+                println!("Could not determine directory from file path");
+            }
+        }
+        Ok(None) => {
+            println!("User canceled the file dialog");
+        }
+        Err(e) => {
+            eprintln!("Error: {}", e);
+        }
+    } 
+            
+            }
 
         });
    
