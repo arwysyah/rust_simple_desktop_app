@@ -1,10 +1,12 @@
-use std::{fs};
-
+use audio::open_folders;
+#[allow(dead_code)]
+// use::std::env::args;
 
 use eframe::egui;
-use native_dialog::FileDialog;
+
+use crate::audio::{generate_audio,show_directory};
 // use std::fs;
-#[allow(dead_code)]
+mod audio;
 #[derive(Default)]
 struct MyDesktopApp {}
 static LOC_DIR: &str = "/home/arwy/Documents/Projects/";
@@ -22,30 +24,23 @@ impl eframe::App for MyDesktopApp {
    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
        egui::CentralPanel::default().show(ctx, |ui| {
       let mut name = "Arwy";
-      let mut age = 0;     
-    let mut files_directory = Vec::new();
+      let mut age = 0;    
+            // let  is_clicked: bool = false;
+    let mut files_directory: Vec<String> = Vec::new();
 
 ui.heading("MyDesktopApp");
 ui.horizontal(|ui| {
     ui.label("Your name: ");
     ui.text_edit_singleline(&mut name);
 });
+if ui.button("Play Music").clicked(){
+        generate_audio();
+            };
 ui.add(egui::Slider::new(&mut age, 0..=120).text("age"));
 if ui.button("List Directory").clicked() {
+open_folders(LOC_DIR,&mut files_directory);
                 
-                if let Ok(entries) = fs::read_dir(LOC_DIR){
-                    for entry in entries {
-                        let Ok(entry) = entry else { continue };
-                        
-                        let paths = entry.path();
-                        let display_paths = paths.clone();
-                        files_directory.push(display_paths.display().to_string());
-                        // println!("{}",paths.display());
-                    }
-                }else{
-                    println!("Failed open directory")
-                }
-}
+              }
 // ui.label(format!("Hello '{name}', age {age}"));
 if files_directory.is_empty() == false {
                 for files in files_directory {
@@ -53,23 +48,7 @@ if files_directory.is_empty() == false {
                 }
             }   
 if ui.button("Open Directory").clicked() {
-               match FileDialog::new().show_open_single_file() {
-        Ok(Some(file_path)) => {
-            // Get the directory part of the file path
-            if let Some(parent_dir) = file_path.parent() {
-                println!("Selected directory: {}", parent_dir.display());
-            } else {
-                println!("Could not determine directory from file path");
-            }
-        }
-        Ok(None) => {
-            println!("User canceled the file dialog");
-        }
-        Err(e) => {
-            eprintln!("Error: {}", e);
-        }
-    } 
-            
+show_directory();          
             }
 
         });
